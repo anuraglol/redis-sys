@@ -1,6 +1,9 @@
 package core
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 func readSimpleString(data []byte) (string, int, error) {
 	pos := 1
@@ -41,7 +44,7 @@ func readBulkString(data []byte) (string, int, error) {
 	len, delta := readLength(data[pos:])
 	pos += delta
 
-	return string(data[pos:(pos + len + 2)]), pos + len + 2, nil
+	return string(data[pos:(pos + len)]), pos + len + 2, nil
 }
 
 func readArray(data []byte) ([]interface{}, int, error) {
@@ -89,4 +92,30 @@ func Decode(data []byte) (interface{}, error) {
 	}
 	value, _, err := DecodeOne(data)
 	return value, err
+}
+
+func DecodeArrayString(data []byte) ([]string, error) {
+	value, err := Decode(data)
+	if err != nil {
+		return nil, err
+	}
+
+	ts := value.([]interface{})
+	tokens := make([]string, len(ts))
+	for i := range tokens {
+		tokens[i] = ts[i].(string)
+	}
+
+	return tokens, nil
+}
+
+func Encode(value interface{}, isSimple bool) []byte {
+	switch v := value.(type) {
+	case string:
+		if isSimple {
+			return []byte(fmt.Sprintf("+%s\r\n", v))
+		}
+		return []byte(fmt.Sprintf("$%d\r\n%s\r\n", len(v), v))
+	}
+	return []byte{}
 }

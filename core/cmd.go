@@ -1,5 +1,6 @@
 package core
 
-func main() {
-
+type RedisCmd struct {
+	Cmd  string
+	Args []string
 }

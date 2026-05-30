@@ -1,27 +1,47 @@
 package server
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	core "rediss/core"
+	"strings"
 )
 
-func readCommand(conn net.Conn) (string, error) {
-	reader := bufio.NewReader(conn)
-	message, err := reader.ReadString('\n')
+func readCommand(conn net.Conn) (*core.RedisCmd, error) {
+	var buf []byte = make([]byte, 512)
+	n, err := conn.Read(buf[:])
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return message, nil
+	tokens, err := core.DecodeArrayString(buf[:n])
+	if err != nil {
+		return nil, err
+	}
+
+	return &core.RedisCmd{
+		Cmd:  strings.ToUpper(tokens[0]),
+		Args: tokens[1:],
+	}, nil
 }
 
 func writeResponse(msg string, conn net.Conn) error {
 	response := fmt.Sprintf(msg + "\n")
 	_, err := conn.Write([]byte(response))
 	return err
+}
+
+func respondError(err error, c net.Conn) {
+	c.Write([]byte(fmt.Sprintf("-%s\r\n", err)))
+}
+
+func respond(cmd *core.RedisCmd, c net.Conn) {
+	err := core.EvalAndRespond(cmd, c)
+	if err != nil {
+		respondError(err, c)
+	}
 }
 
 func RunSyncTCPServer() {
@@ -56,11 +76,7 @@ func RunSyncTCPServer() {
 				}
 				log.Println("error: ", err)
 			}
-
-			log.Println("you said", cmd)
-			if err = writeResponse(cmd, conn); err != nil {
-				log.Println("error writing: ", err)
-			}
+			respond(cmd, conn)
 		}
 	}
 }
