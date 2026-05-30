@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func readCommand(conn net.Conn) (*core.RedisCmd, error) {
+func readCommand(conn io.ReadWriter) (*core.RedisCmd, error) {
 	var buf []byte = make([]byte, 512)
 	n, err := conn.Read(buf[:])
 	if err != nil {
@@ -33,11 +33,11 @@ func writeResponse(msg string, conn net.Conn) error {
 	return err
 }
 
-func respondError(err error, c net.Conn) {
+func respondError(err error, c io.ReadWriter) {
 	c.Write([]byte(fmt.Sprintf("-%s\r\n", err)))
 }
 
-func respond(cmd *core.RedisCmd, c net.Conn) {
+func respond(cmd *core.RedisCmd, c io.ReadWriter) {
 	err := core.EvalAndRespond(cmd, c)
 	if err != nil {
 		respondError(err, c)
