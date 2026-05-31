@@ -9,22 +9,39 @@ import (
 	"strings"
 )
 
-func readCommand(conn io.ReadWriter) (*core.RedisCmd, error) {
+func toArrayString(ai []interface{}) ([]string, error) {
+	as := make([]string, len(ai))
+	for i := range ai {
+		as[i] = ai[i].(string)
+	}
+	return as, nil
+}
+
+func readCommand(conn io.ReadWriter) (core.RedisCmds, error) {
 	var buf []byte = make([]byte, 512)
 	n, err := conn.Read(buf[:])
 	if err != nil {
 		return nil, err
 	}
 
-	tokens, err := core.DecodeArrayString(buf[:n])
+	values, err := core.Decode(buf[:n])
 	if err != nil {
 		return nil, err
 	}
 
-	return &core.RedisCmd{
-		Cmd:  strings.ToUpper(tokens[0]),
-		Args: tokens[1:],
-	}, nil
+	var cmds []*core.RedisCmd = make([]*core.RedisCmd, 0)
+	for _, value := range values {
+		tokens, err := toArrayString(value.([]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		cmds = append(cmds, &core.RedisCmd{
+			Cmd:  strings.ToUpper(tokens[0]),
+			Args: tokens[1:],
+		})
+	}
+
+	return cmds, nil
 }
 
 func writeResponse(msg string, conn net.Conn) error {
@@ -37,11 +54,8 @@ func respondError(err error, c io.ReadWriter) {
 	c.Write([]byte(fmt.Sprintf("-%s\r\n", err)))
 }
 
-func respond(cmd *core.RedisCmd, c io.ReadWriter) {
-	err := core.EvalAndRespond(cmd, c)
-	if err != nil {
-		respondError(err, c)
-	}
+func respond(cmds core.RedisCmds, c io.ReadWriter) {
+	core.EvalAndRespond(cmds, c)
 }
 
 func RunSyncTCPServer() {
@@ -66,7 +80,7 @@ func RunSyncTCPServer() {
 		log.Println("client connected with address", conn.RemoteAddr())
 
 		for {
-			cmd, err := readCommand(conn)
+			cmds, err := readCommand(conn)
 			if err != nil {
 				conn.Close()
 				conn_clients--
@@ -76,7 +90,7 @@ func RunSyncTCPServer() {
 				}
 				log.Println("error: ", err)
 			}
-			respond(cmd, conn)
+			respond(cmds, conn)
 		}
 	}
 }

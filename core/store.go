@@ -3,6 +3,7 @@ package core
 import "time"
 
 var store map[string]*Obj
+var MAX_KEYS_LIM = 20000
 
 type Obj struct {
 	Value     interface{}
@@ -26,6 +27,9 @@ func NewObj(value interface{}, durationMs int64) *Obj {
 }
 
 func Put(key string, value *Obj) {
+	if len(store) >= MAX_KEYS_LIM {
+		evict()
+	}
 	store[key] = value
 }
 
