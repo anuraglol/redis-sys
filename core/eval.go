@@ -40,6 +40,7 @@ func evalSET(args []string) []byte {
 	var exDurationMs int64 = -1
 
 	key, value = args[0], args[1]
+	oType, oEnc := deduceTypeEncoding(value)
 
 	for i := 2; i < len(args); i++ {
 		switch args[i] {
@@ -59,7 +60,7 @@ func evalSET(args []string) []byte {
 		}
 	}
 
-	Put(key, NewObj(value, exDurationMs))
+	Put(key, NewObj(value, exDurationMs, oType, oEnc))
 	return RESP_OK
 }
 
@@ -148,6 +149,31 @@ func evalBGREWRITEAOF(args []string) []byte {
 	return RESP_OK
 }
 
+func evalINCR(args []string) []byte {
+	if len(args) <= 1 {
+		return Encode(errors.New("(error) ERR wrong number of arguments for 'expire' command"), false)
+	}
+
+	key := args[0]
+	obj := Get(key)
+	if obj == nil {
+		obj := NewObj("0", -1, OBJ_TYPE_STRING, OBJ_ENCODING_INT)
+		Put(key, obj)
+	}
+
+	if err := assertType(obj.TypeEncoding, OBJ_TYPE_STRING); err != nil {
+		return Encode(err, false)
+	}
+	if err := assertEncoding(obj.TypeEncoding, OBJ_TYPE_STRING); err != nil {
+		return Encode(err, false)
+	}
+
+	i, _ := strconv.ParseInt(obj.Value.(string), 10, 64)
+	i++
+	obj.Value = strconv.FormatInt(i, 10)
+	return Encode(i, false)
+}
+
 func EvalAndRespond(cmds RedisCmds, c io.ReadWriter) {
 	var response []byte
 	buf := bytes.NewBuffer(response)
@@ -168,6 +194,8 @@ func EvalAndRespond(cmds RedisCmds, c io.ReadWriter) {
 			buf.Write(evalEXPIRE(cmd.Args))
 		case "BGREWRITEAOF":
 			buf.Write(evalBGREWRITEAOF(cmd.Args))
+		case "INCR":
+			buf.Write(evalINCR(cmd.Args))
 		default:
 			buf.Write(evalPING(cmd.Args))
 		}
