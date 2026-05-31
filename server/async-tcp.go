@@ -5,9 +5,12 @@ import (
 	"net"
 	"rediss/core"
 	"syscall"
+	"time"
 )
 
 var conn_clients = 0
+var cronFrequency = 1 * time.Second
+var lastCronExecutionTime = time.Now()
 
 func RunAsyncTCPServer() error {
 	log.Println("starting an async sever")
@@ -53,6 +56,12 @@ func RunAsyncTCPServer() error {
 	}
 
 	for {
+		// expiry cron logic
+		if time.Now().After(lastCronExecutionTime.Add(cronFrequency)) {
+			core.DeleteExpiredKeys()
+			lastCronExecutionTime = time.Now()
+		}
+
 		nevents, e := syscall.EpollWait(epollFD, events[:], -1)
 		if e != nil {
 			continue
