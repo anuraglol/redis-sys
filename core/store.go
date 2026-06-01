@@ -10,6 +10,7 @@ var expires map[*Obj]uint64
 
 func init() {
 	store = make(map[string]*Obj)
+	expires = make(map[*Obj]uint64)
 }
 
 func setExpiry(obj *Obj, exDurationMs int64) {
