@@ -190,23 +190,42 @@ func evalLRU(args []string) []byte {
 	return RESP_OK
 }
 
+func evalSTATS(args []string) []byte {
+	s := GetStats()
+
+	arr := []string{
+		"total_commands", strconv.FormatInt(s.TotalCommands, 10),
+		"set_cmds", strconv.FormatInt(s.SetCmds, 10),
+		"get_cmds", strconv.FormatInt(s.GetCmds, 10),
+		"ping_cmds", strconv.FormatInt(s.PingCmds, 10),
+		"expire_cmds", strconv.FormatInt(s.ExpireCmds, 10),
+	}
+
+	return Encode(arr, false)
+}
+
 func EvalAndRespond(cmds RedisCmds, c io.ReadWriter) {
 	var response []byte
 	buf := bytes.NewBuffer(response)
 
 	for _, cmd := range cmds {
+		IncrTotalCommands()
 		switch cmd.Cmd {
 		case "PING":
+			IncrPingCmds()
 			buf.Write(evalPING(cmd.Args))
 		case "SET":
+			IncrSetCmds()
 			buf.Write(evalSET(cmd.Args))
 		case "GET":
+			IncrGetCmds()
 			buf.Write(evalGET(cmd.Args))
 		case "TTL":
 			buf.Write(evalTTL(cmd.Args))
 		case "DEL":
 			buf.Write(evalDEL(cmd.Args))
 		case "EXPIRE":
+			IncrExpireCmds()
 			buf.Write(evalEXPIRE(cmd.Args))
 		case "BGREWRITEAOF":
 			buf.Write(evalBGREWRITEAOF(cmd.Args))
@@ -218,6 +237,8 @@ func EvalAndRespond(cmds RedisCmds, c io.ReadWriter) {
 			buf.Write(evalLATENCY(cmd.Args))
 		case "LRU":
 			buf.Write(evalLRU(cmd.Args))
+		case "STATS":
+			buf.Write(evalSTATS(cmd.Args))
 		default:
 			buf.Write(evalPING(cmd.Args))
 		}

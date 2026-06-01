@@ -124,8 +124,8 @@ func Encode(value interface{}, isSimple bool) []byte {
 	case []string:
 		var b []byte
 		buf := bytes.NewBuffer(b)
-		for _, b := range value.([]string) {
-			buf.Write(encodeString(b))
+		for _, str := range v {
+			buf.Write(encodeString(str))
 		}
 		return []byte(fmt.Sprintf("*%d\r\n%s", len(v), buf.Bytes()))
 	default:
