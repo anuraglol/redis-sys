@@ -94,6 +94,8 @@ func main() {
 	mux.HandleFunc("/ttl/", handleTtl)
 	mux.HandleFunc("/stats", handleStats)
 	mux.HandleFunc("/getall", handleGetAll)
+	mux.HandleFunc("/seed", handleSeeding)
+	mux.HandleFunc("/flushall", handleFlushAll)
 
 	fmt.Println("Proxy server running on port 8001...")
 	handler := cors.New(

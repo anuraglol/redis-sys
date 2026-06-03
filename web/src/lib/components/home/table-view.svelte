@@ -5,6 +5,8 @@
     import EditEntryDialog from "./edit-entry-dialog.svelte";
     import DeleteEntryDialog from "./delete-entry-dialog.svelte";
     import CreateEntryDialog from "./create-entry-dialog.svelte";
+    import FlushAllDialog from "./flush-all-dialog.svelte";
+    import Seed from "./seed.svelte";
 
     const getAll = getAllQuery();
 
@@ -26,6 +28,8 @@
         <h2 class="text-sm font-semibold tracking-tight">Data View Tada</h2>
     </div>
     <div class="flex gap-6 items-center">
+        <Seed />
+        <FlushAllDialog />
         <CreateEntryDialog />
         <span class="text-xs text-zinc-500">
             {#if getAll.isSuccess}

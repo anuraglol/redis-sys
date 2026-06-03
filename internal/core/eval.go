@@ -205,7 +205,7 @@ func evalSTATS(args []string) []byte {
 	return Encode(arr, false)
 }
 
-func EvalGETALL(args []string) []byte {
+func evalGETALL(args []string) []byte {
 	if len(args) != 0 {
 		return Encode(errors.New("ERR wrong number of arguments for 'get all' command"), false)
 	}
@@ -224,6 +224,21 @@ func EvalGETALL(args []string) []byte {
 	}
 
 	return Encode(arr, false)
+}
+
+func evalFLUSHALL(args []string) []byte {
+	if len(args) != 0 {
+		return Encode(errors.New("ERR wrong number of arguments for 'flush all' command"), false)
+	}
+
+	count := 0
+	for key := range store {
+		if ok := Del(key); ok {
+			count++
+		}
+	}
+
+	return RESP_OK
 }
 
 func EvalAndRespond(cmds RedisCmds, c io.ReadWriter) {
@@ -262,7 +277,9 @@ func EvalAndRespond(cmds RedisCmds, c io.ReadWriter) {
 		case "STATS":
 			buf.Write(evalSTATS(cmd.Args))
 		case "GETALL":
-			buf.Write(EvalGETALL(cmd.Args))
+			buf.Write(evalGETALL(cmd.Args))
+		case "FLUSHALL":
+			buf.Write(evalFLUSHALL(cmd.Args))
 		default:
 			buf.Write(evalPING(cmd.Args))
 		}

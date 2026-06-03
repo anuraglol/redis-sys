@@ -9,11 +9,8 @@ key/value store over tcp. talks resp. ascii client like `redis-cli` works.
 ## run
 
 ```sh
-go build ./...
-go run .
+nix run nixpkgs#process-compose -- -f process-compose.yaml
 ```
-
-server prints `hello world` then starts.
 
 ## test
 
@@ -52,26 +49,27 @@ client/            empty for now.
 
 ## commands
 
-| cmd | args | notes |
-|---|---|---|
-| PING | `[msg]` | `+PONG` if no arg, else bulk echo. |
-| SET | `key value [EX seconds]` | `+OK`. picks int / embstr / raw encoding. |
-| GET | `key` | bulk, or `$-1` nil / expired. |
-| TTL | `key` | secs. `:-2` no key, `:-1` no expiry. |
-| DEL | `key [key ...]` | int count deleted. |
-| EXPIRE | `key seconds` | `:1` / `:0`. |
-| INCR | `key` | int, creates `0` if missing. type=string, enc=int. |
-| BGREWRITEAOF | - | dumps all keys to aof file as SET. |
-| LRU | - | forces lru eviction pass. |
-| STATS | - | array of counters. |
-| CLIENT | - | stub, `+OK`. |
-| LATENCY | - | stub, empty array. |
+| cmd          | args                     | notes                                              |
+| ------------ | ------------------------ | -------------------------------------------------- |
+| PING         | `[msg]`                  | `+PONG` if no arg, else bulk echo.                 |
+| SET          | `key value [EX seconds]` | `+OK`. picks int / embstr / raw encoding.          |
+| GET          | `key`                    | bulk, or `$-1` nil / expired.                      |
+| TTL          | `key`                    | secs. `:-2` no key, `:-1` no expiry.               |
+| DEL          | `key [key ...]`          | int count deleted.                                 |
+| EXPIRE       | `key seconds`            | `:1` / `:0`.                                       |
+| INCR         | `key`                    | int, creates `0` if missing. type=string, enc=int. |
+| BGREWRITEAOF | -                        | dumps all keys to aof file as SET.                 |
+| LRU          | -                        | forces lru eviction pass.                          |
+| STATS        | -                        | array of counters.                                 |
+| CLIENT       | -                        | stub, `+OK`.                                       |
+| LATENCY      | -                        | stub, empty array.                                 |
 
 unknown cmd -> falls through to PING.
 
 ## resp
 
 encode + decode for:
+
 - `+` simple string
 - `-` error
 - `:` int64
