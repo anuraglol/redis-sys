@@ -210,17 +210,54 @@ func evalGETALL(args []string) []byte {
 		return Encode(errors.New("ERR wrong number of arguments for 'get all' command"), false)
 	}
 
-	arr := []string{}
-	for key, obj := range store {
-		valStr := obj.String()
+	type result struct {
+		key, val, ttl string
+	}
 
-		var ttlStr string
-		if exp, exists := expires[obj]; exists {
-			ttlStr = fmt.Sprintf("%d", exp)
-		} else {
-			ttlStr = "-1"
-		}
-		arr = append(arr, key, valStr, ttlStr)
+	numItems := len(store)
+	if numItems == 0 {
+		return Encode([]string{}, false)
+	}
+
+	maxConcurrency := 100
+	if maxConcurrency > numItems {
+		maxConcurrency = numItems
+	}
+
+	type task struct {
+		key string
+		obj *Obj
+	}
+
+	tasks := make(chan task, numItems)
+	results := make(chan result, numItems)
+
+	for i := 0; i < maxConcurrency; i++ {
+		go func() {
+			for t := range tasks {
+				valStr := t.obj.String()
+				var ttlStr string
+
+				if exp, exists := expires[t.obj]; exists {
+					ttlStr = fmt.Sprintf("%d", exp)
+				} else {
+					ttlStr = "-1"
+				}
+
+				results <- result{key: t.key, val: valStr, ttl: ttlStr}
+			}
+		}()
+	}
+
+	for k, o := range store {
+		tasks <- task{key: k, obj: o}
+	}
+	close(tasks)
+
+	arr := make([]string, 0, numItems*3)
+	for i := 0; i < numItems; i++ {
+		res := <-results
+		arr = append(arr, res.key, res.val, res.ttl)
 	}
 
 	return Encode(arr, false)

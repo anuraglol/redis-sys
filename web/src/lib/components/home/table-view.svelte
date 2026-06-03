@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getAllQuery } from "$lib/queries/queries";
-    import { Terminal, Loader2, AlertCircle, Inbox } from "@lucide/svelte";
+    import { Loader2, AlertCircle, Inbox, RefreshCw } from "@lucide/svelte";
     import * as Table from "$lib/components/ui/table";
     import EditEntryDialog from "./edit-entry-dialog.svelte";
     import DeleteEntryDialog from "./delete-entry-dialog.svelte";
@@ -24,10 +24,19 @@
     class="h-16 border-b border-border px-8 flex items-center justify-between bg-card/30 backdrop-blur-md shrink-0"
 >
     <div class="flex items-center gap-3">
-        <Terminal class="w-5 h-5 text-primary" />
         <h2 class="text-sm font-semibold tracking-tight">Data View Tada</h2>
     </div>
     <div class="flex gap-6 items-center">
+        <span class="relative flex size-2.5">
+            {#if getAll.isFetching}
+                <span
+                    class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-200 opacity-75"
+                ></span>
+            {/if}
+            <span
+                class="relative inline-flex size-2.5 rounded-full bg-green-300"
+            ></span>
+        </span>
         <Seed />
         <FlushAllDialog />
         <CreateEntryDialog />

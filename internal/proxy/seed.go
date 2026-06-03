@@ -13,7 +13,7 @@ func handleSeeding(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	for i := range 2000 {
+	for i := range 100 {
 		_, err := executeCommand("set", []string{fmt.Sprintf("%d", i), fmt.Sprintf("%d", i+1)})
 		if err != nil {
 			log.Printf("oops failed on one front")
