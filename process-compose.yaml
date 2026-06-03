@@ -1,0 +1,20 @@
+version: "0.5"
+
+processes:
+  go-service-1:
+    command: "air"
+    working_dir: "./internal"
+    availability:
+      restart: always
+
+  go-service-2:
+    command: "air"
+    working_dir: "./internal/proxy"
+    availability:
+      restart: always
+
+  svelte-frontend:
+    command: "nr dev"
+    working_dir: "./web"
+    availability:
+      restart: always

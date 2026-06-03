@@ -1,0 +1,27 @@
+package core
+
+import "fmt"
+
+type Obj struct {
+	TypeEncoding   uint8
+	Value          interface{}
+	LastAccessedAt uint32
+}
+
+var OBJ_TYPE_STRING uint8 = 0 << 4
+
+var OBJ_ENCODING_RAW uint8 = 0
+var OBJ_ENCODING_INT uint8 = 1
+var OBJ_ENCODING_EMBSTR uint8 = 2
+
+func (o *Obj) String() string {
+	switch o.TypeEncoding & 0x0F {
+	case OBJ_ENCODING_INT:
+		return fmt.Sprintf("%d", o.Value)
+	default:
+		if s, ok := o.Value.(string); ok {
+			return s
+		}
+		return fmt.Sprintf("%v", o.Value)
+	}
+}
