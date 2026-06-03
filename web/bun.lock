@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "kotiri",
+      "name": "web",
       "dependencies": {
         "@tanstack/svelte-query": "^6.1.33",
         "@tanstack/svelte-query-devtools": "^6.1.33",

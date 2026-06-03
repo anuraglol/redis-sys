@@ -93,8 +93,28 @@ func main() {
 	mux.HandleFunc("/incr/", handleIncr)
 	mux.HandleFunc("/ttl/", handleTtl)
 	mux.HandleFunc("/stats", handleStats)
+	mux.HandleFunc("/getall", handleGetAll)
 
 	fmt.Println("Proxy server running on port 8001...")
-	handler := cors.Default().Handler(mux)
+	handler := cors.New(
+		cors.Options{
+			AllowedOrigins: []string{
+				"http://localhost:3000",
+				"http://localhost:300",
+			},
+			AllowedMethods: []string{
+				"GET",
+				"POST",
+				"PUT",
+				"DELETE",
+				"OPTIONS",
+				"PATCH",
+				"HEAD",
+			},
+			AllowedHeaders:   []string{"*"},
+			AllowCredentials: true,
+			Debug:            true,
+		},
+	).Handler(mux)
 	http.ListenAndServe(":8001", handler)
 }

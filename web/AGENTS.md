@@ -1,4 +1,4 @@
-# kotiri - agent guide
+# web - agent guide
 
 sveltekit app, svelte 5 runes, ts strict, tailwind v4, shadcn-svelte (rhea style), bun pkg mgr, tanstack table-core already wired via `src/lib/components/ui/data-table/`.
 
@@ -35,12 +35,14 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 ## code style
 
 ### file naming
+
 - kebab-case only: `<name>-<name>.svelte` or `<name>-<name>.ts`. no camelCase, no PascalCase filenames.
 - svelte component files match the component: `data-table.svelte`, `flex-render.svelte`.
 - reactive logic for a component: same name with `.svelte.ts` suffix (e.g. `data-table.svelte.ts`).
 - barrel re-exports: `index.ts` inside the component folder.
 
 ### imports
+
 - use `$lib/...` alias, never relative `../../` for lib code.
 - svelte 5 imports from `svelte`, `svelte/elements`, `svelte/reactivity` (e.g. `MediaQuery`).
 - type-only imports use `type` keyword: `import { type ButtonProps } from "./button.svelte"`.
@@ -49,6 +51,7 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 - for ui components needing jsx-style attrs, import from `svelte/elements` (`HTMLButtonAttributes`, `HTMLAnchorAttributes`).
 
 ### formatting
+
 - tabs for indent (matches existing files).
 - double quotes for strings (`"button"`, not `'button'`).
 - semicolons on.
@@ -57,6 +60,7 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 - self-closing tags where possible.
 
 ### types
+
 - ts strict mode on (`strict: true` in tsconfig). no `any` unless absolutely needed + eslint-disable comment.
 - component props: `type ButtonProps = WithElementRef<HTMLButtonAttributes> & ...` pattern. props go in a `<script lang="ts" module>` block for exports, instance `<script lang="ts">` for `$props()` destructure.
 - destructure props with `let { class: className, variant = "default", ref = $bindable(null), ...restProps }: ButtonProps = $props();` pattern.
@@ -64,6 +68,7 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 - `data-slot="button"` style attrs for styling hooks (shadcn convention).
 
 ### svelte 5 runes
+
 - runes mode forced via `svelte.config.js` -> use `$props`, `$state`, `$derived`, `$bindable`, `$effect`. no legacy `export let` / `$:`.
 - `$props()` for component props, `$bindable()` for two-way bound refs.
 - snippets: `{#if href}...{:else}...{/if}` branches, `{@render children?.()}` for slot content.
@@ -71,6 +76,7 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 - `MediaQuery` from `svelte/reactivity` for reactive media queries (see `is-mobile.svelte.ts`).
 
 ### naming
+
 - components: PascalCase (`Button`, `DataTable`).
 - variables/fns: camelCase.
 - types/interfaces: PascalCase.
@@ -78,6 +84,7 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 - file names: kebab-case only (see above).
 
 ### styling
+
 - tailwind v4 utility-first. theme tokens via css vars in `layout.css` (oklch colors).
 - shadcn-svelte `rhea` style preset. lucide-svelte for icons (`@lucide/svelte`).
 - component variants via `tailwind-variants` (`tv()` -> `buttonVariants`).
@@ -85,6 +92,7 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 - merge classes with `cn()` not template strings.
 
 ### error handling
+
 - sveltekit `+page.ts`/`+page.server.ts` load fns throw `error(status, msg)` for http errors, `redirect(status, location)` for redirects.
 - async fns in components: handle via `try/catch` in `$effect` or use sveltekit form actions + superforms (`sveltekit-superforms` already installed).
 - toast errors via `svelte-sonner` (`toast.error(...)`).

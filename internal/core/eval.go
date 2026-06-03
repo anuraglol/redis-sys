@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"strconv"
 	"time"
@@ -204,6 +205,27 @@ func evalSTATS(args []string) []byte {
 	return Encode(arr, false)
 }
 
+func EvalGETALL(args []string) []byte {
+	if len(args) != 0 {
+		return Encode(errors.New("ERR wrong number of arguments for 'get all' command"), false)
+	}
+
+	arr := []string{}
+	for key, obj := range store {
+		valStr := obj.String()
+
+		var ttlStr string
+		if exp, exists := expires[obj]; exists {
+			ttlStr = fmt.Sprintf("%d", exp)
+		} else {
+			ttlStr = "-1"
+		}
+		arr = append(arr, key, valStr, ttlStr)
+	}
+
+	return Encode(arr, false)
+}
+
 func EvalAndRespond(cmds RedisCmds, c io.ReadWriter) {
 	var response []byte
 	buf := bytes.NewBuffer(response)
@@ -239,6 +261,8 @@ func EvalAndRespond(cmds RedisCmds, c io.ReadWriter) {
 			buf.Write(evalLRU(cmd.Args))
 		case "STATS":
 			buf.Write(evalSTATS(cmd.Args))
+		case "GETALL":
+			buf.Write(EvalGETALL(cmd.Args))
 		default:
 			buf.Write(evalPING(cmd.Args))
 		}
