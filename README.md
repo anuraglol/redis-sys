@@ -1,10 +1,16 @@
-# rediss
+# kotiri
 
-tiny redis-like in-mem store. go. listens on 127.0.0.1:8000.
+tiny redis-like in-mem store. go. listens on 127.0.0.1:8000. ships with a sveltekit web frontend.
 
 ## what it is
 
 key/value store over tcp. talks resp. ascii client like `redis-cli` works.
+
+## web frontend
+
+sveltekit app in `web/`. dashboard over the http proxy on `:8001`.
+
+![web frontend](./screenshot.png)
 
 ## run
 
