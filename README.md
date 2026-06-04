@@ -11,6 +11,7 @@ key/value store over tcp. talks resp. ascii client like `redis-cli` works.
 sveltekit app in `web/`. dashboard over the http proxy on `:8001`.
 
 ![web frontend](./screenshot.png)
+![cli view](./ss2.png)
 
 ## run
 
