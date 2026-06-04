@@ -12,7 +12,7 @@ export const getStatsQuery = () =>
       const data: {
         stats: Array<string>;
       } = await res.json();
-      const parsed = {};
+      const parsed: Record<string, string> = {};
 
       if (data && Array.isArray(data.stats)) {
         for (let i = 0; i < data.stats.length; i += 2) {
