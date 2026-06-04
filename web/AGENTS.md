@@ -1,6 +1,6 @@
 # web - agent guide
 
-sveltekit app, svelte 5 runes, ts strict, tailwind v4, shadcn-svelte (rhea style), bun pkg mgr, tanstack table-core already wired via `src/lib/components/ui/data-table/`.
+sveltekit app, svelte 5 runes, ts strict, tailwind v4, shadcn-svelte (rhea style), bun pkg mgr.
 
 ## build / lint / test
 
@@ -37,8 +37,8 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 ### file naming
 
 - kebab-case only: `<name>-<name>.svelte` or `<name>-<name>.ts`. no camelCase, no PascalCase filenames.
-- svelte component files match the component: `data-table.svelte`, `flex-render.svelte`.
-- reactive logic for a component: same name with `.svelte.ts` suffix (e.g. `data-table.svelte.ts`).
+- svelte component files match the component: `button.svelte`, `dialog-content.svelte`.
+- reactive logic for a component: same name with `.svelte.ts` suffix (e.g. `is-mobile.svelte.ts`).
 - barrel re-exports: `index.ts` inside the component folder.
 
 ### imports
@@ -77,7 +77,7 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 
 ### naming
 
-- components: PascalCase (`Button`, `DataTable`).
+- components: PascalCase (`Button`, `Dialog`).
 - variables/fns: camelCase.
 - types/interfaces: PascalCase.
 - css vars / tailwind tokens: kebab-case (`--background`, `text-foreground`).
@@ -107,12 +107,10 @@ aliases (from components.json + svelte-kit defaults): `$lib`, `$lib/components`,
 
 ## data layer
 
-- @tanstack/table-core already installed, wired via `createSvelteTable` in `src/lib/components/ui/data-table/data-table.svelte.ts`. use that for tables.
-- **add @tanstack/svelte-query** for server state when needed. install: `bun add @tanstack/svelte-query`. wrap root `+layout.svelte` with `QueryClientProvider` + `setQueryClientContext`. use `createQuery`, `createMutation` from `@tanstack/svelte-query`. default staleTime 30s, refetchOnWindowFocus false unless explicitly needed.
+- **@tanstack/svelte-query** wired in root `+layout.svelte` via `QueryClientProvider`. use `createQuery`, `createMutation`, `useQueryClient` from `@tanstack/svelte-query`. default staleTime 30s, refetchOnWindowFocus false unless explicitly needed.
 
 ## patterns
 
-- **table**: `const table = createSvelteTable({ data, columns, getCoreRowModel: getCoreRowModel() })`. render with `FlexRender` for header/cell content (snippets or components). use `renderComponent` / `renderSnippet` from `data-table/render-helpers` to bridge column defs to svelte.
 - **icons**: `import { IconName } from "@lucide/svelte"`. size via class (`size-4`, `size-5`) not the `size` prop when possible.
 - **media query hook**: extend `MediaQuery` from `svelte/reactivity` (see `is-mobile.svelte.ts`) instead of hand-rolling matchMedia + state.
 - **forms**: `sveltekit-superforms` + `formsnap` + `zod` (or arktype/valibot) -> action in `+page.server.ts`, schema validated server-side, client uses `superForm` + `Form` from `formsnap`.
